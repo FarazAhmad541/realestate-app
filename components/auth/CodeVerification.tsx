@@ -1,130 +1,97 @@
+'use client'
+
 import { Button } from '@/components/ui/button'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
+import { LoaderCircle } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 
-type Props = {
-  handleCodeVerification: (code: string) => void
-}
+export default function CodeVerification({
+  handleCodeVerification,
+  isLoading,
+}: {
+  handleCodeVerification?: (code: string) => void
+  isLoading: boolean
+}) {
+  const [code, setCode] = useState<string[]>(Array(6).fill(''))
+  const [isComplete, setIsComplete] = useState(false)
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([])
 
-const VerificationCodeInput = ({ handleCodeVerification }: Props) => {
-  const [code, setCode] = useState(['', '', '', '', '', ''])
-  const inputRefs = useRef([])
-
-  // Initialize refs array
   useEffect(() => {
-    inputRefs.current = inputRefs.current.slice(0, 6)
+    if (inputRefs.current[0]) {
+      inputRefs.current[0].focus()
+    }
   }, [])
 
-  const handleChange = (index, value) => {
-    // Only allow numbers
+  const handleChange = (index: number, value: string) => {
     if (!/^\d*$/.test(value)) return
-
     const newCode = [...code]
     newCode[index] = value
     setCode(newCode)
 
-    // If a digit was entered, move to the next input
-    if (value !== '' && index < 5) {
-      inputRefs.current[index + 1].focus()
+    if (value && index < code.length - 1) {
+      inputRefs.current[index + 1]?.focus()
+    }
+
+    setIsComplete(newCode.every((digit) => digit !== ''))
+  }
+
+  const handleKeyDown = (
+    index: number,
+    e: React.KeyboardEvent<HTMLInputElement>
+  ) => {
+    if (e.key === 'Backspace' && !code[index] && index > 0) {
+      inputRefs.current[index - 1]?.focus()
     }
   }
 
-  const handleKeyDown = (index, e) => {
-    // Handle backspace
-    if (e.key === 'Backspace') {
-      if (code[index] === '' && index > 0) {
-        const newCode = [...code]
-        newCode[index - 1] = ''
-        setCode(newCode)
-        inputRefs.current[index - 1].focus()
-      } else {
-        const newCode = [...code]
-        newCode[index] = ''
-        setCode(newCode)
-      }
-    }
-    // Handle left arrow
-    else if (e.key === 'ArrowLeft' && index > 0) {
-      inputRefs.current[index - 1].focus()
-    }
-    // Handle right arrow
-    else if (e.key === 'ArrowRight' && index < 5) {
-      inputRefs.current[index + 1].focus()
-    }
-  }
-
-  const handlePaste = (e) => {
-    e.preventDefault()
-    const pastedData = e.clipboardData.getData('text').slice(0, 6)
-    if (!/^\d*$/.test(pastedData)) return
-
-    const newCode = [...code]
-    pastedData.split('').forEach((char, index) => {
-      if (index < 6) newCode[index] = char
-    })
-    setCode(newCode)
-
-    // Focus the next empty input or the last input
-    const nextEmptyIndex = newCode.findIndex((digit) => digit === '')
-    if (nextEmptyIndex !== -1) {
-      inputRefs.current[nextEmptyIndex].focus()
-    } else {
-      inputRefs.current[5].focus()
-    }
-  }
-
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    if (code.every((digit) => digit !== '')) {
-      handleCodeVerification(code.join(''))
+  const handleSubmit = () => {
+    const verificationCode = code.join('')
+    if (verificationCode.length === 6) {
+      handleCodeVerification?.(verificationCode)
     }
   }
 
   return (
-    <Card className='w-full max-w-md mx-auto'>
-      <CardHeader>
-        <CardTitle>Verification Code</CardTitle>
-        <CardDescription>
-          Enter the 6-digit code sent to your device
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit}>
-          <div className='flex justify-between gap-2 mb-6'>
-            {code.map((digit, index) => (
-              <Input
-                key={index}
-                ref={(el) => (inputRefs.current[index] = el)}
-                type='text'
-                inputMode='numeric'
-                maxLength={1}
-                value={digit}
-                onChange={(e) => handleChange(index, e.target.value)}
-                onKeyDown={(e) => handleKeyDown(index, e)}
-                onPaste={handlePaste}
-                className='w-12 h-12 text-center text-lg font-semibold'
-                autoFocus={index === 0}
-              />
-            ))}
-          </div>
-          <Button
-            type='submit'
-            className='w-full'
-            disabled={!code.every((digit) => digit !== '')}
-          >
-            Verify
-          </Button>
-        </form>
-      </CardContent>
-    </Card>
+    <div className='flex flex-col items-center justify-center h-screen w-full m-auto'>
+      <div className='w-full max-w-sm mx-auto space-y-6'>
+        <div className='text-center space-y-2'>
+          <h2 className='text-3xl font-bold'>Verify Your Code</h2>
+          <p className='text-muted-foreground'>
+            Enter the verification code we sent to your Email
+          </p>
+        </div>
+        <div className='flex justify-center space-x-2'>
+          {code.map((digit, index) => (
+            <Input
+              key={index}
+              type='text'
+              inputMode='numeric'
+              maxLength={1}
+              value={digit}
+              onChange={(e) => handleChange(index, e.target.value)}
+              onKeyDown={(e) => handleKeyDown(index, e)}
+              ref={(el) => {
+                inputRefs.current[index] = el
+              }}
+              className='w-12 h-12 text-center text-2xl'
+              aria-label={`Digit ${index + 1}`}
+            />
+          ))}
+        </div>
+        <Button
+          onClick={handleSubmit}
+          className='w-full bg-indigo-600 hover:bg-indigo-700'
+          disabled={!isComplete || isLoading}
+        >
+          {isLoading ? (
+            <>
+              <LoaderCircle className='mr-2 animate-spin' /> Verifying...
+            </>
+          ) : (
+            <>Verify</>
+          )}
+        </Button>
+      </div>
+    </div>
   )
 }
-
-export default VerificationCodeInput

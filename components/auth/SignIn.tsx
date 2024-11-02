@@ -1,15 +1,14 @@
 import { CredentialsSchema } from '@/lib/definitions'
 import { EyeIcon, EyeOffIcon, LoaderCircle, MoveLeft } from 'lucide-react'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
-import { z } from 'zod'
+import { useState } from 'react'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import { Label } from '../ui/label'
 
 type Props = {
-  handleGoogleSignUp: () => void
-  handleEmailSignUp: ({
+  handleGoogleSignIn: () => void
+  handleEmailSignIn: ({
     email,
     password,
   }: {
@@ -20,14 +19,12 @@ type Props = {
 }
 
 export default function SignUp({
-  handleGoogleSignUp,
-  handleEmailSignUp,
+  handleGoogleSignIn,
+  handleEmailSignIn,
   isLoading,
 }: Props) {
   const [showPassword, setShowPassword] = useState(false)
   const [email, setEmail] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
-  const [passwordsMatch, setPasswordsMatch] = useState(true)
   const [password, setPassword] = useState('')
 
   const togglePasswordVisibility = () => {
@@ -36,30 +33,17 @@ export default function SignUp({
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    if (email === password) {
-      alert('Password cannot be same as email')
+    if (!email || !password) {
+      alert('Please fill in all fields')
       return
     }
     try {
       CredentialsSchema.parse({ email, password })
-
-      handleEmailSignUp({ email, password })
+      handleEmailSignIn({ email, password })
     } catch (error) {
-      if (error instanceof z.ZodError) {
-        console.log(error.issues[0].message)
-        return
-      }
       console.log(error)
     }
   }
-
-  useEffect(() => {
-    if (password === confirmPassword) {
-      setPasswordsMatch(true)
-    } else {
-      setPasswordsMatch(false)
-    }
-  }, [password, confirmPassword])
 
   return (
     <div className='grid grid-cols-1 md:grid-cols-6 lg:grid-cols-12 gap-4 items-center justify-center min-h-screen p-2 md:p-0 lg:p-0'>
@@ -76,10 +60,10 @@ export default function SignUp({
         <div className='w-[400px] h-fit bg-white rounded-xl p-8 shadow-xl'>
           <div className='text-center'>
             <h2 className='mt-6 text-3xl font-bold tracking-tight text-indigo-600'>
-              Create an Account
+              Sign In to Your Account
             </h2>
             <p className='mt-2 text-sm text-muted-foreground'>
-              Sign up to get started with our service
+              Sign in to get started with our service
             </p>
           </div>
           <form
@@ -131,24 +115,6 @@ export default function SignUp({
                   </Button>
                 </div>
               </div>
-              <div>
-                <Label htmlFor='confirm-password'>Confirm Password</Label>
-                <Input
-                  id='confirm-password'
-                  name='confirm-password'
-                  type={showPassword ? 'text' : 'password'}
-                  required
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className={` ${
-                    confirmPassword &&
-                    (passwordsMatch
-                      ? ' focus-visible:ring-green-500'
-                      : ' focus-visible:ring-red-300')
-                  }`}
-                  placeholder='Confirm your password'
-                />
-              </div>
             </div>
 
             <div>
@@ -159,10 +125,10 @@ export default function SignUp({
               >
                 {isLoading ? (
                   <>
-                    <LoaderCircle className='mr-2 animate-spin' /> Signing up
+                    <LoaderCircle className='mr-2 animate-spin' /> Signing in
                   </>
                 ) : (
-                  <>Sign up</>
+                  <>Sign in</>
                 )}
               </Button>
             </div>
@@ -183,7 +149,7 @@ export default function SignUp({
                 variant='outline'
                 className='w-full'
                 type='button'
-                onClick={handleGoogleSignUp}
+                onClick={handleGoogleSignIn}
               >
                 <svg
                   xmlns='http://www.w3.org/2000/svg'
@@ -211,16 +177,16 @@ export default function SignUp({
                     d='M43.611,20.083L43.595,20L42,20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571	c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z'
                   ></path>
                 </svg>
-                Sign up with Google
+                Sign in with Google
               </Button>
               <div className='text-center mt-4'>
                 <p>
-                  Already have an account?{' '}
+                  Don&apos;t have an account?{' '}
                   <Link
-                    href='/sign-in'
+                    href='/sign-up'
                     className='text-blue-500 hover:underline'
                   >
-                    Sign in
+                    Sign up
                   </Link>
                 </p>
               </div>
