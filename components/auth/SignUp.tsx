@@ -66,7 +66,7 @@ export default function SignUp({
 
   return (
     <div className='grid grid-cols-1 md:grid-cols-6 lg:grid-cols-12 gap-4 items-center justify-center min-h-screen p-2 md:p-0 lg:p-0'>
-      <div className='w-full h-full hidden md:block lg:block md:col-span-2 lg:col-span-4 bg-[url("/static/images/sign-up-background.jpg")] bg-cover bg-no-repeat '></div>
+      <div className='w-full h-full hidden md:block lg:block md:col-span-2 lg:col-span-4 bg-[url("/images/sign-up-background.jpg")] bg-cover bg-no-repeat '></div>
       <div className='col-span-1 md:col-span-4 lg:col-span-8 flex justify-center items-center p-4 relative h-full'>
         <Link
           href='/'

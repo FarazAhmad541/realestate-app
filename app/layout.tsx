@@ -1,4 +1,4 @@
-import { Toaster } from '@/components/ui/toaster'
+import Navbar from '@/components/Navbar'
 import { ClerkProvider } from '@clerk/nextjs'
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
@@ -23,8 +23,8 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang='en'>
         <body className={`${inter.variable} antialiased`}>
+          <Navbar />
           {children}
-          <Toaster />
         </body>
       </html>
     </ClerkProvider>

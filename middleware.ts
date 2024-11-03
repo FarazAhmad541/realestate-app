@@ -1,6 +1,19 @@
-import { clerkMiddleware } from '@clerk/nextjs/server'
+import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
+import { NextRequest, NextResponse } from 'next/server'
 
-export default clerkMiddleware()
+function customMiddleware(request: NextRequest) {
+  const headers = new Headers(request.headers)
+  headers.set('x-current-path', request.nextUrl.pathname)
+  return NextResponse.next({
+    headers,
+  })
+}
+
+const isPublicRoute = createRouteMatcher(['/sign-in(.*)', '/sign-up(.*)'])
+
+export default clerkMiddleware(async (auth, req) => {
+  return customMiddleware(req)
+})
 
 export const config = {
   matcher: [
