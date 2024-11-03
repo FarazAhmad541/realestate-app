@@ -1,11 +1,14 @@
 'use client'
 import SignIn from '@/components/auth/SignIn'
 import { useSignIn } from '@clerk/nextjs'
+import { isClerkAPIResponseError } from '@clerk/nextjs/errors'
+
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 export default function Page() {
   const { isLoaded, signIn, setActive } = useSignIn()
   const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState('')
   const router = useRouter()
 
   const handleGoogleSignIn = async () => {
@@ -32,27 +35,38 @@ export default function Page() {
     if (!isLoaded) return null
     setIsLoading(true)
     try {
-      const signInStatus = await signIn.create({ identifier: email, password })
-      if (signInStatus.status !== 'complete') {
-        console.log(JSON.stringify(signInStatus, null, 2))
+      const { status, createdSessionId } = await signIn.create({
+        identifier: email,
+        password,
+      })
+      if (status !== 'complete') {
+        console.log(JSON.stringify(status, null, 2))
       }
 
-      if (signInStatus.status === 'complete') {
-        await setActive({ session: signInStatus.createdSessionId })
+      if (status === 'complete') {
+        await setActive({ session: createdSessionId })
         router.push('/')
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       }
-    } catch (error) {
-      console.log(error)
+    } catch (err) {
+      if (isClerkAPIResponseError(err)) {
+        console.log(JSON.stringify(err, null, 2))
+        setError(err.errors[0].message)
+        setIsLoading(false)
+        return
+      }
     }
     setIsLoading(false)
   }
 
   return (
-    <SignIn
-      isLoading={isLoading}
-      handleGoogleSignIn={handleGoogleSignIn}
-      handleEmailSignIn={handleEmailSignIn}
-    />
+    <>
+      <SignIn
+        isLoading={isLoading}
+        handleGoogleSignIn={handleGoogleSignIn}
+        handleEmailSignIn={handleEmailSignIn}
+        error={error}
+      />
+    </>
   )
 }

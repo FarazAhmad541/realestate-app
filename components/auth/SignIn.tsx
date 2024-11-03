@@ -2,6 +2,7 @@ import { CredentialsSchema } from '@/lib/definitions'
 import { EyeIcon, EyeOffIcon, LoaderCircle, MoveLeft } from 'lucide-react'
 import Link from 'next/link'
 import { useState } from 'react'
+import { Alert, AlertDescription } from '../ui/alert'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import { Label } from '../ui/label'
@@ -16,12 +17,14 @@ type Props = {
     password: string
   }) => void
   isLoading: boolean
+  error: string
 }
 
 export default function SignUp({
   handleGoogleSignIn,
   handleEmailSignIn,
   isLoading,
+  error,
 }: Props) {
   const [showPassword, setShowPassword] = useState(false)
   const [email, setEmail] = useState('')
@@ -114,6 +117,14 @@ export default function SignUp({
                     )}
                   </Button>
                 </div>
+                {error && (
+                  <Alert
+                    variant='destructive'
+                    className='mt-2 px-4 py-2 text-xs'
+                  >
+                    <AlertDescription>{error}</AlertDescription>
+                  </Alert>
+                )}
               </div>
             </div>
 

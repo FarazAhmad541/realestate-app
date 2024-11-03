@@ -2,11 +2,13 @@
 import CodeVerification from '@/components/auth/CodeVerification'
 import SignUp from '@/components/auth/SignUp'
 import { useSignUp } from '@clerk/nextjs'
+import { isClerkAPIResponseError } from '@clerk/nextjs/errors'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
 export default function Page() {
   const { isLoaded, signUp, setActive } = useSignUp()
+  const [error, setError] = useState('')
 
   const [pendingVerfication, setPendingVerfication] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
@@ -47,8 +49,13 @@ export default function Page() {
       })
       setPendingVerfication(true)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-      console.log(error.message)
+    } catch (err: any) {
+      if (isClerkAPIResponseError(err)) {
+        console.log(JSON.stringify(err, null, 2))
+        setError(err.errors[0].message)
+        setIsLoading(false)
+        return
+      }
     }
     setIsLoading(false)
   }
@@ -80,6 +87,7 @@ export default function Page() {
       handleGoogleSignUp={handleGoogleSignUp}
       handleEmailSignUp={handleEmailSignUp}
       isLoading={isLoading}
+      error={error}
     />
   ) : (
     <CodeVerification

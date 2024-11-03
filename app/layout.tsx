@@ -1,8 +1,8 @@
+import { Toaster } from '@/components/ui/toaster'
 import { ClerkProvider } from '@clerk/nextjs'
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
-
 const inter = Inter({
   subsets: ['latin'],
   weight: ['400'],
@@ -22,7 +22,10 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang='en'>
-        <body className={`${inter.variable} antialiased`}>{children}</body>
+        <body className={`${inter.variable} antialiased`}>
+          {children}
+          <Toaster />
+        </body>
       </html>
     </ClerkProvider>
   )
