@@ -1,11 +1,12 @@
 import { CredentialsSchema } from '@/lib/definitions'
+import clsx from 'clsx'
 import { EyeIcon, EyeOffIcon, LoaderCircle, MoveLeft } from 'lucide-react'
 import Link from 'next/link'
 import { useState } from 'react'
-import { Alert, AlertDescription } from '../ui/alert'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import { Label } from '../ui/label'
+import AuthErrorElement from './AuthErrorElement'
 
 type Props = {
   handleGoogleSignIn: () => void
@@ -18,6 +19,7 @@ type Props = {
   }) => void
   isLoading: boolean
   error: string
+  setError: (error: string) => void
 }
 
 export default function SignUp({
@@ -25,6 +27,7 @@ export default function SignUp({
   handleEmailSignIn,
   isLoading,
   error,
+  setError,
 }: Props) {
   const [showPassword, setShowPassword] = useState(false)
   const [email, setEmail] = useState('')
@@ -84,8 +87,11 @@ export default function SignUp({
                   autoComplete='email'
                   required
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className='mt-1'
+                  onChange={(e) => {
+                    setError('')
+                    setEmail(e.target.value)
+                  }}
+                  className={clsx('mt-1', error && 'border-red-500')}
                   placeholder='Enter your email'
                 />
               </div>
@@ -96,8 +102,11 @@ export default function SignUp({
                     id='password'
                     type={showPassword ? 'text' : 'password'}
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className='pr-10'
+                    onChange={(e) => {
+                      setError('')
+                      setPassword(e.target.value)
+                    }}
+                    className={clsx(' pr-10', error && 'border-red-500')}
                     placeholder='Enter your password'
                   />
                   <Button
@@ -117,14 +126,7 @@ export default function SignUp({
                     )}
                   </Button>
                 </div>
-                {error && (
-                  <Alert
-                    variant='destructive'
-                    className='mt-2 px-4 py-2 text-xs'
-                  >
-                    <AlertDescription>{error}</AlertDescription>
-                  </Alert>
-                )}
+                {error && <AuthErrorElement error={error} />}
               </div>
             </div>
 

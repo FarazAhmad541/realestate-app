@@ -3,10 +3,10 @@ import { EyeIcon, EyeOffIcon, LoaderCircle, MoveLeft } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { z } from 'zod'
-import { Alert, AlertDescription } from '../ui/alert'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import { Label } from '../ui/label'
+import AuthErrorElement from './AuthErrorElement'
 
 type Props = {
   handleGoogleSignUp: () => void
@@ -152,11 +152,7 @@ export default function SignUp({
                   placeholder='Confirm your password'
                 />
               </div>
-              {error && (
-                <Alert variant='destructive' className='mt-2 px-4 py-2 text-xs'>
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
-              )}
+              {error && <AuthErrorElement error={error} />}
             </div>
 
             <div>

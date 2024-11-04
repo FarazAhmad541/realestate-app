@@ -34,6 +34,7 @@ export default function Page() {
   }) => {
     if (!isLoaded) return null
     setIsLoading(true)
+    setError('')
     try {
       const { status, createdSessionId } = await signIn.create({
         identifier: email,
@@ -66,6 +67,7 @@ export default function Page() {
         handleGoogleSignIn={handleGoogleSignIn}
         handleEmailSignIn={handleEmailSignIn}
         error={error}
+        setError={setError}
       />
     </>
   )
