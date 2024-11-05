@@ -1,8 +1,6 @@
-import { CredentialsSchema } from '@/lib/definitions'
 import { EyeIcon, EyeOffIcon, LoaderCircle, MoveLeft } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import { z } from 'zod'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import { Label } from '../ui/label'
@@ -43,17 +41,7 @@ export default function SignUp({
       alert('Password cannot be same as email')
       return
     }
-    try {
-      CredentialsSchema.parse({ email, password })
-
-      handleEmailSignUp({ email, password })
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        console.log(error.issues[0].message)
-        return
-      }
-      console.log(error)
-    }
+    handleEmailSignUp({ email, password })
   }
 
   useEffect(() => {

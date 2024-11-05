@@ -1,6 +1,6 @@
 'use client'
 import SignIn from '@/components/auth/SignIn'
-import { useSignIn } from '@clerk/nextjs'
+import { useSignIn, useUser } from '@clerk/nextjs'
 import { isClerkAPIResponseError } from '@clerk/nextjs/errors'
 
 import { useRouter } from 'next/navigation'
@@ -9,7 +9,16 @@ export default function Page() {
   const { isLoaded, signIn, setActive } = useSignIn()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
+  const { isSignedIn } = useUser()
+
   const router = useRouter()
+
+  if (!isLoaded) return
+
+  if (isSignedIn) {
+    router.push('/')
+    return
+  }
 
   const handleGoogleSignIn = async () => {
     if (!isLoaded) return null
@@ -20,8 +29,14 @@ export default function Page() {
         redirectUrlComplete: '/',
       })
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-      console.log(error.message)
+    } catch (err: any) {
+      if (isClerkAPIResponseError(err)) {
+        console.log(JSON.stringify(err, null, 2))
+        setError(err.errors[0].message)
+        setIsLoading(false)
+        return
+      }
+      console.log(JSON.stringify(err, null, 2))
     }
   }
 
@@ -56,6 +71,7 @@ export default function Page() {
         setIsLoading(false)
         return
       }
+      console.log(JSON.stringify(err, null, 2))
     }
     setIsLoading(false)
   }

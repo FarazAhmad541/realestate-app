@@ -9,7 +9,13 @@ export default function CodeVerification({
   handleCodeVerification,
   isLoading,
 }: {
-  handleCodeVerification?: (code: string) => void
+  handleCodeVerification?: ({
+    code,
+    password,
+  }: {
+    code: string
+    password?: string
+  }) => void
   isLoading: boolean
 }) {
   const [code, setCode] = useState<string[]>(Array(6).fill(''))
@@ -47,7 +53,7 @@ export default function CodeVerification({
   const handleSubmit = () => {
     const verificationCode = code.join('')
     if (verificationCode.length === 6) {
-      handleCodeVerification?.(verificationCode)
+      handleCodeVerification?.({ code: verificationCode })
     }
   }
 

@@ -1,7 +1,7 @@
 'use client'
 import CodeVerification from '@/components/auth/CodeVerification'
 import SignUp from '@/components/auth/SignUp'
-import { useSignUp } from '@clerk/nextjs'
+import { useSignUp, useUser } from '@clerk/nextjs'
 import { isClerkAPIResponseError } from '@clerk/nextjs/errors'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
@@ -9,15 +9,21 @@ import { useState } from 'react'
 export default function Page() {
   const { isLoaded, signUp, setActive } = useSignUp()
   const [error, setError] = useState('')
+  const { isSignedIn } = useUser()
 
   const [pendingVerfication, setPendingVerfication] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
 
-  if (!isLoaded) return null
+  if (!isLoaded) return
+
+  if (isSignedIn) {
+    router.push('/')
+    return
+  }
 
   const handleGoogleSignUp = async () => {
-    if (!isLoaded) return null
+    if (!isLoaded) return
     try {
       await signUp.authenticateWithRedirect({
         strategy: 'oauth_google',
@@ -25,8 +31,13 @@ export default function Page() {
         redirectUrlComplete: '/',
       })
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-      console.log(error.message)
+    } catch (err: any) {
+      if (isClerkAPIResponseError(err)) {
+        console.log(JSON.stringify(err, null, 2))
+        setError(err.errors[0].message)
+        return
+      }
+      console.log(JSON.stringify(err, null, 2))
     }
   }
 
@@ -56,11 +67,19 @@ export default function Page() {
         setIsLoading(false)
         return
       }
+      console.log(JSON.stringify(err, null, 2))
     }
     setIsLoading(false)
   }
 
-  const handleCodeVerification = async (code: string) => {
+  const handleCodeVerification = async ({
+    code,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    password,
+  }: {
+    code: string
+    password?: string
+  }) => {
     if (!isLoaded) return null
     setIsLoading(true)
     try {
@@ -76,8 +95,14 @@ export default function Page() {
         setPendingVerfication(false)
         router.push('/')
       }
-    } catch (error) {
-      console.log(error)
+    } catch (err) {
+      if (isClerkAPIResponseError(err)) {
+        console.log(JSON.stringify(err, null, 2))
+        setError(err.errors[0].message)
+        setIsLoading(false)
+        return
+      }
+      console.log(JSON.stringify(err, null, 2))
     }
     setIsLoading(false)
   }

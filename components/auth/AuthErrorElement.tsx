@@ -15,7 +15,7 @@ export default function AuthErrorElement({ error }: { error: string }) {
         isVisible ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
       )}
     >
-      <ShieldAlert className='h-4 w-4 mt-[1px] text-red-500' />
+      <ShieldAlert className='h-4 w-4 text-red-500' />
       <p className=' text-red-500'>{error}</p>
     </div>
   )

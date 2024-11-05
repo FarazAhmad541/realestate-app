@@ -1,4 +1,3 @@
-import { CredentialsSchema } from '@/lib/definitions'
 import clsx from 'clsx'
 import { EyeIcon, EyeOffIcon, LoaderCircle, MoveLeft } from 'lucide-react'
 import Link from 'next/link'
@@ -43,12 +42,7 @@ export default function SignUp({
       alert('Please fill in all fields')
       return
     }
-    try {
-      CredentialsSchema.parse({ email, password })
-      handleEmailSignIn({ email, password })
-    } catch (error) {
-      console.log(error)
-    }
+    handleEmailSignIn({ email, password })
   }
 
   return (
@@ -95,8 +89,20 @@ export default function SignUp({
                   placeholder='Enter your email'
                 />
               </div>
-              <div>
-                <Label htmlFor='password'>Password</Label>
+              <div className='space-y-1'>
+                <Label
+                  htmlFor='password'
+                  className='flex items-center justify-between'
+                >
+                  <p>Password</p>
+                  <Link
+                    href='/reset-password'
+                    className='text-indigo-600 text-xs hover:underline'
+                  >
+                    Forgot Password?
+                  </Link>
+                </Label>
+
                 <div className='relative'>
                   <Input
                     id='password'

@@ -22,7 +22,9 @@ export default function Navbar() {
 
   const pathname = usePathname()
   const isPublicRoute =
-    pathname.startsWith('/sign-in') || pathname.startsWith('/sign-up')
+    pathname.startsWith('/sign-in') ||
+    pathname.startsWith('/sign-up') ||
+    pathname.startsWith('/reset-password')
   if (isPublicRoute) {
     return null
   }
