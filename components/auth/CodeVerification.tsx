@@ -7,20 +7,13 @@ import { useEffect, useRef, useState } from 'react'
 
 export default function CodeVerification({
   handleCodeVerification,
-  isLoading,
 }: {
-  handleCodeVerification?: ({
-    code,
-    password,
-  }: {
-    code: string
-    password?: string
-  }) => void
-  isLoading: boolean
+  handleCodeVerification?: ({ code }: { code: string }) => void
 }) {
   const [code, setCode] = useState<string[]>(Array(6).fill(''))
   const [isComplete, setIsComplete] = useState(false)
   const inputRefs = useRef<(HTMLInputElement | null)[]>([])
+  const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
     if (inputRefs.current[0]) {
@@ -51,10 +44,12 @@ export default function CodeVerification({
   }
 
   const handleSubmit = () => {
+    setIsLoading(true)
     const verificationCode = code.join('')
     if (verificationCode.length === 6) {
       handleCodeVerification?.({ code: verificationCode })
     }
+    setIsLoading(false)
   }
 
   return (

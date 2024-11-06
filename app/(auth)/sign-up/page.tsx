@@ -8,30 +8,32 @@ import { useState } from 'react'
 
 export default function Page() {
   const { isLoaded, signUp, setActive } = useSignUp()
-  const [error, setError] = useState('')
   const { isSignedIn } = useUser()
-
-  const [pendingVerfication, setPendingVerfication] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
 
+  const [error, setError] = useState('')
+  const [pendingVerfication, setPendingVerfication] = useState(false)
+
+  // If the Clerk SDK is not loaded, return null to avoid rendering anything
   if (!isLoaded) return
 
+  // If the user is already signed in, redirect them to the home page
   if (isSignedIn) {
     router.push('/')
     return
   }
 
+  // Function to handle Google sign-up
   const handleGoogleSignUp = async () => {
     if (!isLoaded) return
     try {
+      // Use the Clerk SDK to authenticate with Google and redirect the user
       await signUp.authenticateWithRedirect({
         strategy: 'oauth_google',
         redirectUrl: '/sso-callback',
         redirectUrlComplete: '/',
       })
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (err: any) {
+    } catch (err) {
       if (isClerkAPIResponseError(err)) {
         console.log(JSON.stringify(err, null, 2))
         setError(err.errors[0].message)
@@ -41,6 +43,7 @@ export default function Page() {
     }
   }
 
+  // Function to handle email sign-up
   const handleEmailSignUp = async ({
     email,
     password,
@@ -49,40 +52,33 @@ export default function Page() {
     password: string
   }) => {
     if (!isLoaded) return null
-    setIsLoading(true)
     try {
+      // Use the Clerk SDK to create a new user with email and password
       await signUp.create({
         emailAddress: email,
         password: password,
       })
+      // Prepare email address verification
       await signUp.prepareEmailAddressVerification({
         strategy: 'email_code',
       })
+      // Set the pending verification flag
       setPendingVerfication(true)
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (err: any) {
+    } catch (err) {
       if (isClerkAPIResponseError(err)) {
         console.log(JSON.stringify(err, null, 2))
         setError(err.errors[0].message)
-        setIsLoading(false)
         return
       }
       console.log(JSON.stringify(err, null, 2))
     }
-    setIsLoading(false)
   }
 
-  const handleCodeVerification = async ({
-    code,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    password,
-  }: {
-    code: string
-    password?: string
-  }) => {
+  // Function to handle code verification
+  const handleCodeVerification = async ({ code }: { code: string }) => {
     if (!isLoaded) return null
-    setIsLoading(true)
     try {
+      // Use the Clerk SDK to attempt email address verification
       const signUpStatus = await signUp.attemptEmailAddressVerification({
         code,
       })
@@ -91,7 +87,9 @@ export default function Page() {
       }
 
       if (signUpStatus.status === 'complete') {
+        // Set the active session to the newly created session (user is now signed in)
         await setActive({ session: signUpStatus.createdSessionId })
+        // Reset the pending verification flag
         setPendingVerfication(false)
         router.push('/')
       }
@@ -99,25 +97,19 @@ export default function Page() {
       if (isClerkAPIResponseError(err)) {
         console.log(JSON.stringify(err, null, 2))
         setError(err.errors[0].message)
-        setIsLoading(false)
         return
       }
       console.log(JSON.stringify(err, null, 2))
     }
-    setIsLoading(false)
   }
 
   return !pendingVerfication ? (
     <SignUp
       handleGoogleSignUp={handleGoogleSignUp}
       handleEmailSignUp={handleEmailSignUp}
-      isLoading={isLoading}
       error={error}
     />
   ) : (
-    <CodeVerification
-      handleCodeVerification={handleCodeVerification}
-      isLoading={isLoading}
-    />
+    <CodeVerification handleCodeVerification={handleCodeVerification} />
   )
 }
