@@ -110,6 +110,9 @@ export default function Page() {
       error={error}
     />
   ) : (
-    <CodeVerification handleCodeVerification={handleCodeVerification} />
+    <CodeVerification
+      handleCodeVerification={handleCodeVerification}
+      type='sign-up'
+    />
   )
 }

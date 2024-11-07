@@ -1,21 +1,15 @@
 'use client'
-import CodeVerification from '@/components/auth/CodeVerification'
 import GenerateResetPasswordCode from '@/components/auth/GenerateResetPasswordCode'
 import ResetPasswordForm from '@/components/auth/ResetPasswordForm'
 import { useAuth, useSignIn } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
-// There is no separate method present in Clerk SDK to check if the verification code is valid or not.
-// Therefore the is redirected to the reset password page even if the code is invalid.
-// This is a known issue and will need to be fixed in the future.
-
 export default function Page() {
   const router = useRouter()
   const { isSignedIn } = useAuth()
   const { isLoaded, signIn, setActive } = useSignIn()
   const [successFulCreation, setSuccessfulCreation] = useState(false)
-  const [code, setCode] = useState('')
   const [error, setError] = useState('')
 
   // If Clerk SDK is not loaded, return null to avoid rendering anything
@@ -47,7 +41,13 @@ export default function Page() {
   }
 
   // Function to reset the password
-  async function resetPassword({ password }: { password?: string }) {
+  async function resetPassword({
+    code,
+    password,
+  }: {
+    code: string
+    password?: string
+  }) {
     await signIn
       ?.attemptFirstFactor({
         strategy: 'reset_password_email_code',
@@ -69,11 +69,6 @@ export default function Page() {
       })
   }
 
-  // Function to handle the verification code
-  function handleCode({ code }: { code: string }) {
-    setCode(code)
-  }
-
   // Render the appropriate component based on the state
   return (
     <>
@@ -84,12 +79,13 @@ export default function Page() {
           setError={setError}
         />
       )}
-      {successFulCreation &&
-        (!code ? (
-          <CodeVerification handleCodeVerification={handleCode} />
-        ) : (
-          <ResetPasswordForm resetPassword={resetPassword} />
-        ))}
+      {successFulCreation && (
+        <ResetPasswordForm
+          resetPassword={resetPassword}
+          error={error}
+          setError={setError}
+        />
+      )}
     </>
   )
 }
